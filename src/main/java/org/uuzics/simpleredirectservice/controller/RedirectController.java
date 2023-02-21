@@ -5,14 +5,26 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.uuzics.simpleredirectservice.entity.Redirection;
+import org.uuzics.simpleredirectservice.service.RedirectionService;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 @Controller
 public class RedirectController {
-    @RequestMapping(value = "/{resource}", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String redirect(@PathVariable("resource") String resource, Model model) {
+    @Resource
+    private RedirectionService redirectionService;
+
+    @RequestMapping(value = "/{resourceId}", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String redirect(@PathVariable("resourceId") String resourceId, Model model) {
         // Retrieve redirect url and redirect type
-        String redirectUrl = "https://example.org";
-        String redirectType = "http301";
+        List<Redirection> tempRedirectionList = this.redirectionService.queryByResourceId(resourceId);
+        if (null == tempRedirectionList || 0 == tempRedirectionList.size()) {
+            return "error";
+        }
+        String redirectUrl = tempRedirectionList.get(0).getRedirectUrl();
+        String redirectType = tempRedirectionList.get(0).getRedirectType();
 
         // Validation
         if (null == redirectUrl || null == redirectType) {
